@@ -22,61 +22,65 @@ module acc-performance {
     */   
     grouping performances {
         list performance {
-            key 'pm-parameter-name start-time';
+            config false;
+            key 'object-name pm-parameter-name granularity start-time';
+            leaf object-name {
+                type string {
+                    length "1..64";
+                }
+                description "object-name";
+            }
             leaf pm-parameter-name {
                 type string {
                     length "1..64";
                 }
                 description "pm-parameter-name";
             }
+            leaf granularity {
+                type acc-type:granularity;
+                description "granularity";
+            }
             leaf start-time {
                 type yang:date-and-time;
                 description "start-time";
-            }
-            leaf object-name {
-                mandatory true;
-                type string {
-                    length "1..64";
-                }
-                config false;
-                description "object-name";
             }
             leaf object-type {
                 mandatory true;
                 type string {
                     length "1..64";
                 }
-                config false;
                 description "object-type";
             }
-            leaf granularity {
-                type acc-type:granularity;
-                config false;
-                description "granularity";
-            }
-            leaf digital-pm-value {
-                type acc-type:real;
-                config false;
-                description "digital-pm-value";
-            }
-            container analog-pm-value {
-                leaf max-value {
+            choice digital-or-analog  {
+		config false;
+                case digital {
+                  leaf digital-pm-value {
                     type acc-type:real;
-                    description "max-value";
+                    description "digital-pm-value";
+                    }
                 }
-                leaf min-value {
-                    type acc-type:real;
-                    description "min-value";
+                case analog {
+                    container analog-pm-value {
+                        leaf max-value {
+                            type acc-type:real;
+                            description "max-value";
+                        }
+                        leaf min-value {
+                            type acc-type:real;
+                            description "min-value";
+                        }
+                        leaf average-value {
+                            type acc-type:real;
+                            description "average-value";
+                        }
+                        leaf current-value {
+                            mandatory true;
+                            type acc-type:real;
+                            description "current-value";
+                        }
+                        description "analog-pm-value";
+                    }
                 }
-                leaf average-value {
-                    type acc-type:real;
-                    description "average-value";
-                }
-                leaf current-value {
-                    type acc-type:real;
-                    description "current-value";
-                }
-                description "analog-pm-value";
             }
             description "performance list";
         }
@@ -93,40 +97,33 @@ module acc-performance {
     * Operations
     */
     rpc get-history-performance-monitoring-data {
-        description "none";
             input {
                 leaf start-time {
                     mandatory true;
                     type yang:date-and-time;
-                    description "none";
                 }
                 leaf end-time {
                     mandatory true;
                     type yang:date-and-time;
-                    description "none";
                 }
                 leaf object-name {
                     type string {
                         length "1..64";
                     }
-                    description "none";
                 }
                 leaf granularity {
                     mandatory true;
                     type acc-type:granularity;
-                    description "none";
                 }
                 leaf pm-parameter-name {
                     type string {
                         length "1..64";
                     }
-                    description "none";
                 }
             }
             output {
                 container performances {
                     uses performances;
-                    description "none";
                 } 
             }
     }

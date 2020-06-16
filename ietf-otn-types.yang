@@ -218,12 +218,13 @@ module ietf-otn-types {
       "Client signal type of OC192 & STM-64";
   }
 
+/*
   identity STM-256 {
     base client-signal;
     description
       "Client signal type of OC768 & STM-256";
   }
-
+*/
   identity FC-100 {
     base client-signal;
     description

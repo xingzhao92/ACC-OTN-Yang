@@ -3,73 +3,56 @@ module acc-protection-group {
     namespace "urn:ccsa:yang:acc-protection-group";
     prefix acc-pg;
 
-    import acc-devm {
-         prefix acc-devm; 
-    }
-
-    organization
-        "xxx";
-    contact
-        "xxx";
-    description
-        "xxx";
-    revision 2019-02-13 {
-        description
-            "Initial revision.";
-        reference
-            "xxx";
-    }
+    
     /*
     * common types
     */
     typedef protection-type {
         type enumeration {
-            enum odu-sncp {
-                value 0;
-                description
-                    "ODU SNCP";
-            }
-            enum vc-sncp {
+            enum odu-sncp-i { 
+		value 0;
+			}
+            enum odu-sncp-s { 
                 value 1;
-                description
-                    "VC SNCP";
             }
-            enum olp-1-plus-1 {
-                value 2;
-                description
-                    "OLP 1+1";
+	    enum vc-sncp { 
+		value 2;
+	    }
+	    enum och-1-plus-1 { 
+		value 3;
+		description "OTU port 1+1 protection"
+	    }
+	    enum msp-1-plus-1 {
+		value 4; 
+	    }
+            enum lag-1-to-1 {
+                value 5; 
+		description "ETH layer 1:1 manual & static LAG protection"
+            }
+            enum no-protection {
+                value 6; 
             }
         }
-        description
-            "protection type";
     }
-    typedef switch-type {
+    typedef switch-direction {
         type enumeration {
             enum uni-switch {
                 value 0;
-                description
-                    "uni switch";
             }
             enum bi-switch {
                 value 1;
-                description
-                    "bi switch";
             }
         }
         description
-            "switch type";
+            "switch direction";
     }
     typedef sd-trigger {
         type enumeration {
             enum enabled {
                 value 0;
-                description
-                    "sd trigger enabled";
             }
             enum disabled {
                 value 1;
-                description
-                    "sd trigger disabled";
             }
         }
         description
@@ -79,159 +62,127 @@ module acc-protection-group {
         type enumeration {
             enum to-primary {
                 value 0;
-                description
-                    "to primary";
             }
             enum to-secondary {
                 value 1;
-                description
-                    "to secondary";
             }
         }
-        description "protection direction";
     }
     typedef reversion-mode {
         type enumeration {
-            enum return {
+            enum revertive {
                 value 0;
-                description
-                    "none";
             }
-            enum non-return {
+            enum non-revertive {
                 value 1;
-                description
-                    "none";
             }
         }
-        description
-            "reversion mode";
     }
     typedef switch-reason {
         type enumeration {
             enum no-switch {
                 value 0;
-                description
-                    "no switch";
             }
             enum sf-switch {
                 value 1;
-                description
-                    "SF switch";
             }
             enum sd-switch {
                 value 2;
-                description
-                    "SD switch";
             }
             enum manual-switch {
                 value 3;
-                description
-                    "manual switch";
             }
             enum force-switch {
                 value 4;
-                description
-                    "force switch";
             }
             enum cleared {
                 value 5;
-                description
-                    "cleared";
             }
             enum wait-for-restore {
                 value 6;
-                description
-                    "WTR";
+                description "WTR";
             }
             enum lockout {
                 value 7;
-                description
-                    "lockout of protection";
+                description "lockout of protection";
             }
         }
-        description
-            "switch reason";
     }
+
 
     /*
     * groupings
     */
     grouping pg {
-        description
-            "pg";
         leaf pg-id {
+            mandatory true;
             type uint16;
-            description
-                "pg id";
+	    default 1;
         }
         leaf protection-type {
+            mandatory true;
             type protection-type;
-            description
-                "protection type";
-        }
-        leaf switch-type {
-            type switch-type;
-            description
-                "switch type";
         }
         leaf reversion-mode {
+            mandatory true;
             type reversion-mode;
-            description
-                "reversion mode";
+	    default revertive;
         }
-        leaf sd-trigger {
-            type sd-trigger;
-            description
-                "sd protection";
+        leaf tcm {
+            type uint16;
+	    default 1;
         }
+        leaf switch-direction {
+            mandatory true;
+            type switch-direction;
+	    default uni-switch;
+        }
+        
         leaf switch-reason {
             type switch-reason;
             config false;
-            description
-                "switch reason";
+            description "switch reason, default NO SWITCH";
         }
-        leaf wait-to-restore-time {
-            type uint64;
-            units seconds;
-            description
-                "wait to restore time";
+        leaf protection-direction {
+            type protection-direction;
+            config false;
+            description  "protection direction";
         }
         leaf hold-off {
             type uint32;
             units ms;
             default 0;
-            description
-                "hold off time";
+            description  "hold off time";
         }
-        leaf protection-direction {
-            type protection-direction;
-            config false;
-            description
-                "protection direction";
+        leaf wait-to-restore-time {
+            mandatory true;
+            type uint64;
+            units seconds;
+	    default 300;
+            description "wait to restore time";
+        }
+        leaf sd-trigger {
+            type sd-trigger;
+            description "sd protection";
         }
         leaf primary-port {
-            type leafref {
-                path '/acc-devm:ptps/acc-devm:ptp/acc-devm:name';
-            }
-            description
-                "primary port";
+            mandatory true;
+            type string;
+            description "primary port CTP/FTP/PTP, different ports type for different services";
         }
         leaf secondary-port {
-            type leafref {
-                path '/acc-devm:ptps/acc-devm:ptp/acc-devm:name';
-            }
-            description
-                "secondary port";
+            mandatory true;
+            type string;
+            description "secondary port PTP/FTP/CTP, different ports type for different services";
         }
         leaf selected-port {
-            type leafref {
-                path '/acc-devm:ptps/acc-devm:ptp/acc-devm:name';
-            }
+            mandatory true;
+            type string;
             config false;
-            description
-                "selected port";
+            description "selected port PTP/FTP/CTP, different ports type for different services";
         }
     }
+
 
     /*
     * the data tree
@@ -245,20 +196,13 @@ module acc-protection-group {
         description "pgs";
     }
 
-    /*
-    * notifications
-    */
-    notification protection-switch-notification {
+   notification protection-switch-notification {
         leaf protection-switch-serial-no {
             mandatory true;
             type uint64;
-            description
-                "protection switch serial no";
         }
         container pg {
             uses pg;
-            description
-                "pg";
         }
         description "protection switch notification";
     }
@@ -273,22 +217,16 @@ module acc-protection-group {
             leaf pg-id {
                 mandatory true;
                 type uint64;
-                description
-                    "pg id";
             }
 
             leaf protection-command {
                 mandatory true;
                 type switch-reason;
-                description
-                    "protection command";
             }
 
             leaf protection-direction {
                 mandatory true;
                 type protection-direction;
-                description
-                    "protection direction";
             }
         }
     }

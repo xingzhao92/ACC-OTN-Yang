@@ -3,8 +3,8 @@ module acc-otn {
     namespace "urn:ccsa:yang:acc-otn";
     prefix acc-otn;
 
-    import ietf-otn-types {
-        prefix otn-types;
+    import acc-otn-types {
+        prefix acc-otn-types;
     }
     import acc-devm { 
         prefix acc-devm; 
@@ -14,6 +14,10 @@ module acc-otn {
     }
     import acc-yang-types { 
         prefix acc-type; 
+    }
+    
+    import acc-protection-group {
+        prefix acc-pg;
     }
 
     organization
@@ -36,86 +40,9 @@ module acc-otn {
     */
     identity ODU {
         base acc-type:layer-protocol-name;
-        description "";
     }
 
-    identity OTN-ODU0 {
-    base otn-types:client-signal;
-    description
-      "Client signal type of ODU0";
-    }
 
-    identity OTN-ODU1 {
-    base otn-types:client-signal;
-    description
-      "Client signal type of ODU1";
-    }
-
-    identity OTN-ODU2 {
-    base otn-types:client-signal;
-    description
-      "Client signal type of ODU2";
-    }
-
-    identity OTN-ODU4 {
-    base otn-types:client-signal;
-    description
-      "Client signal type of ODU4";
-    }
-
-    typedef adaptation-type {
-        type enumeration {
-            enum CBR_AMP {
-                value 0;
-                description "Asynchronous CBR mapping";
-            }
-            enum CBR_BMP {
-                value 1;
-                description "Bit-synchronous CBR mapping";
-            }
-            enum GFP-T {
-                value 2;
-                description "Transparent generic framing procedure";
-            }
-            enum GFP-F {
-                value 3;
-                description "Frame-Mapped Framing Generic Procedure";
-            }
-            enum NULL {
-                value 4;
-                description "NULL test signal mapping";
-            }
-            enum PRBS {
-                value 5;
-                description "PRBS test signal mapping";
-            }
-            enum CBRx {
-                value 6;
-                description "none";
-            }
-            enum TTT+GMP {
-                value 7;
-                description "none";
-            }
-            enum CBRX_GMP {
-                value 8;
-                description "none";
-            }
-            enum ODUij {
-                value 9;
-                description "none";
-            }
-            enum ODUj21 {
-                value 10;
-                description "none";
-            }
-            enum ODUk {
-                value 11;
-                description "none";
-            }
-        }
-        description "Adaptation type";
-    }
 
     typedef channel-sate {
         type enumeration {
@@ -229,6 +156,24 @@ module acc-otn {
         }
     }
 
+    notification oduflex-notification {
+        leaf oduflex-adjust-serial-no {
+            mandatory true;
+            type uint64;
+            description "g.hao adjust serial No.";
+        }
+        leaf ctp-name {
+            mandatory true;
+            type string {
+                length "1..64";
+            }
+        }
+        leaf modify-result {
+            mandatory true;
+            type g-hao-modify-result;
+        }
+    }
+
     /*
     * groupings
     */
@@ -237,31 +182,24 @@ module acc-otn {
             type string{
               length "1..64";
             }
-            description "none";
         }
         leaf nni-ts-detail {
             type string{
               length "1..64";
             }
-            description "none";
         }
         leaf adaptation-type {
-            type adaptation-type;
-            description "Adaptation type";
+            type acc-otn-types:adaptation-type;
         }
-        leaf client-signal-type {
-            type identityref {
-                base otn-types:client-signal;
-            }
-            description "Client signal type";
+        leaf odu-signal-type {
+            type acc-otn-types:client-signal-type;
+            description "all signal type move to acc-num:client-signal-type";
         }
         leaf switch-capability {
-            type identityref {
-                base otn-types:odu-type;
-            }
+            type acc-otn-types:switch-type;
             description "Switch capability";
         }
-        description "none";
+        description "本来nni结构里面的属性都必选，但如果加上mandatory为true，同时放在secondary-nni里又因子属性必选引起父容器也跟着必选，就与secondary-nni可空矛盾了";
     }
 
     /*
@@ -278,40 +216,33 @@ module acc-otn {
             }
             leaf-list odu-signal-type {
                 min-elements 1;
-                type identityref {
-                    base otn-types:client-signal;
-                }
+                type acc-otn-types:client-signal-type;
                 config false;
                 description "The client signal type.";
             }
             leaf-list adaptation-type {
                 min-elements 1;
-                type adaptation-type;
+                type acc-otn-types:adaptation-type;
                 config false;
                 description "The adaptation type.";
             }
             leaf-list switch-capability {
                 min-elements 1;
-                type identityref {
-                    base otn-types:odu-type;
-                }
+                type acc-otn-types:switch-type;
                 config false;
                 description "The switch capability";
             }
             leaf ts-detail {
                 mandatory true;
                 type string;
-                description "none";
             }
             leaf smtrail-trace-actual-tx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
                 description "The OTU SM trail trace identifier(TTI) transmitted.";
             }
             leaf smtrail-trace-actual-rx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
@@ -319,21 +250,18 @@ module acc-otn {
                 description "The OTU SM trail trace identifier(TTI) received.";
             }
             leaf smtrail-trace-expected-rx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
                 description "The OTU SM trail trace identifier(TTI) expected.";
             }
             leaf pmtrail-trace-actual-tx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
                 description "The ODU PM trail trace identifier(TTI) transmitted.";
             }
             leaf pmtrail-trace-actual-rx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
@@ -341,13 +269,11 @@ module acc-otn {
                 description "The ODU PM trail trace identifier(TTI) received.";
             }
             leaf pmtrail-trace-expected-rx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
                 description "The ODU PM trail trace identifier(TTI) expected.";
             }
-            description "none";
         }
     }
 
@@ -356,21 +282,17 @@ module acc-otn {
         container odu-ctp-pac {
             leaf odu-signal-type {
                 mandatory true;
-                type identityref {
-                    base otn-types:client-signal;
-                }
+                type acc-otn-types:client-signal-type;
                 description "Client signal type";
             }
             leaf adaptation-type {
                 mandatory true;
-                type adaptation-type;
+                type acc-otn-types:adaptation-type;
                 description "Adaptation type";
             }
             leaf switch-capability {
                 mandatory true;
-                type identityref {
-                    base otn-types:odu-type;
-                }
+                type acc-otn-types:switch-type;
                 config false;
                 description "Switch capability";
             }
@@ -379,7 +301,6 @@ module acc-otn {
                 type string{
                 length "1..64";
                 }
-                description "none";
             }
             leaf-list current-number-of-tributary-slots {
                 type uint64;
@@ -387,7 +308,6 @@ module acc-otn {
                 description "Number of tributary slots.";
             }
             leaf pmtrail-trace-actual-tx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
@@ -395,7 +315,6 @@ module acc-otn {
                 description "The ODU PM trail trace identifier(TTI) transmitted.";
             }
             leaf pmtrail-trace-actual-rx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
@@ -403,7 +322,6 @@ module acc-otn {
                 description "The ODU PM trail trace identifier(TTI) received.";
             }
             leaf pmtrail-trace-expected-rx {
-                mandatory true;
                 type string{
                 length "1..128";
                 }
@@ -414,7 +332,6 @@ module acc-otn {
                 config false;
                 description "The status of G.HAO";
             }
-            description "none";
         }
     }
 
@@ -424,28 +341,38 @@ module acc-otn {
     rpc create-odu-connection {
         input {
             uses acc-con:create-connection;
-
+            leaf nni-protection-type {
+                type acc-pg:protection-type;
+            }
+            leaf nni2-protection-type {
+                type acc-pg:protection-type;
+            }
             container client-side-nni {
                 uses nni;
-                description "client side nni";
+                description "client side nni, only for UNI-NNI";
             }
             container primary-nni {
                 uses nni;
-                description "primary nni";
+                description "primary nni, mandatory true";
             }
             container secondary-nni {
                 uses nni;
-                description "secondary nni";
+                description "only for service with protection. Optional";
+            }
+            container primary-nni2 {
+                uses nni;
+                description "only NNI2NNI mode, optional!";
+            }
+            container secondary-nni2 {
+                uses nni;
+                description "only NNI2NNI mode and with protection. optional";
             }
         }
         output {
             container connection {
-                description
-                    "";
                 uses acc-con:connection;
             }           
         }
-        description "";
     }
 
     rpc modify-odu-connection-capacity {
@@ -465,25 +392,15 @@ module acc-otn {
                     "The position.";
             }
             leaf action {
-                mandatory true;
                 type modify-action;
                 description
                     "The Action of the modification.";
             }
-            leaf switch-capability {
-                mandatory true;
-                type identityref {
-                    base otn-types:odu-type;
-                }
-                description "Switch capability";
-            }
             leaf current-number-of-tributary-slots {
-                mandatory true;
                 type uint64;
             }
             leaf ts-detail {
                 type string;
-                description "";
             }
             leaf timeout {
                 mandatory true;
@@ -493,21 +410,5 @@ module acc-otn {
         }
     }
 
-    notification g-hao-notification {
-        leaf g-hao-adjust-serial-no {
-            mandatory true;
-            type uint64;
-            description "g.hao adjust serial No.";
-        }
-        leaf ctp-name {
-            mandatory true;
-            type string {
-                length "1..64";
-            }
-        }
-        leaf modify-result {
-            mandatory true;
-            type g-hao-modify-result;
-        }
-    }
+    
 }
