@@ -29,11 +29,11 @@ module acc-otn {
     description
         "xxx";
 
-    revision 2019-02-13 {
+    revision 2020-07-08 {
         description
-            "Initial revision.";
+            "Final revision";
         reference
-            "xxx";
+            "CCSA接入型OTN接口技术要求";
     }
     /*
     * common types
@@ -189,14 +189,20 @@ module acc-otn {
             }
         }
         leaf adaptation-type {
-            type acc-otn-types:adaptation-type;
+            type identityref {
+                base acc-otn-types:adaptation-type;
+            }
         }
         leaf odu-signal-type {
-            type acc-otn-types:client-signal-type;
+            type identityref {
+                base acc-otn-types:client-signal-type;
+            }
             description "all signal type move to acc-num:client-signal-type";
         }
         leaf switch-capability {
-            type acc-otn-types:switch-type;
+            type identityref {
+                base acc-otn-types:switch-type;
+            }
             description "Switch capability";
         }
         description "本来nni结构里面的属性都必选，但如果加上mandatory为true，同时放在secondary-nni里又因子属性必选引起父容器也跟着必选，就与secondary-nni可空矛盾了";
@@ -206,7 +212,7 @@ module acc-otn {
     * the data tree
     */
     augment "/acc-devm:ptps/acc-devm:ptp" {
-        when "acc-devm:layer-protocol-name = acc-type:ODU";
+        when "acc-devm:layer-protocol-name = 'acc-otn:ODU'";
         container odu-ptp-pac {
             leaf odu-capacity {
                 mandatory true;
@@ -216,19 +222,25 @@ module acc-otn {
             }
             leaf-list odu-signal-type {
                 min-elements 1;
-                type acc-otn-types:client-signal-type;
+                type identityref {
+                    base acc-otn-types:client-signal-type;
+                }
                 config false;
                 description "The client signal type.";
             }
             leaf-list adaptation-type {
                 min-elements 1;
-                type acc-otn-types:adaptation-type;
+                type identityref {
+                    base acc-otn-types:adaptation-type;
+                }
                 config false;
                 description "The adaptation type.";
             }
             leaf-list switch-capability {
                 min-elements 1;
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
                 config false;
                 description "The switch capability";
             }
@@ -278,21 +290,27 @@ module acc-otn {
     }
 
     augment "/acc-devm:ctps/acc-devm:ctp" {
-        when "acc-devm:layer-protocol-name = acc-type:ODU";
+        when "acc-devm:layer-protocol-name = 'acc-otn:ODU'";
         container odu-ctp-pac {
             leaf odu-signal-type {
                 mandatory true;
-                type acc-otn-types:client-signal-type;
+                type identityref {
+                    base acc-otn-types:client-signal-type;
+                }
                 description "Client signal type";
             }
             leaf adaptation-type {
                 mandatory true;
-                type acc-otn-types:adaptation-type;
+                type identityref {
+                    base acc-otn-types:adaptation-type;
+                }
                 description "Adaptation type";
             }
             leaf switch-capability {
                 mandatory true;
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
                 config false;
                 description "Switch capability";
             }
@@ -344,10 +362,18 @@ module acc-otn {
             leaf nni-protection-type {
                 type acc-pg:protection-type;
             }
+			leaf nni-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni tcm of both work path and protection path";
+            }
             leaf nni2-protection-type {
                 type acc-pg:protection-type;
             }
-            container client-side-nni {
+			leaf nni2-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni2 tcm of both work path and protection path";
+            }	
+			container client-side-nni {
                 uses nni;
                 description "client side nni, only for UNI-NNI";
             }

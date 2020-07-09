@@ -2,7 +2,12 @@ module acc-notifications {
     yang-version 1.1;
     namespace "urn:ccsa:yang:acc-notifications";
     prefix acc-ntf;
-
+	revision 2020-07-08 {
+        description
+            "Final revision.";
+        reference
+            "CCSA：接入型OTN管控技术要求";
+    }
 
     /*
     * Common types

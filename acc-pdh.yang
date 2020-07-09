@@ -6,31 +6,18 @@ module acc-pdh {
     import acc-devm { 
         prefix acc-devm; 
     }
-    import acc-connection {
-        prefix acc-con;
-    }
-    import acc-otn {
-        prefix acc-otn;
-    }
-    import acc-yang-types {
-        prefix acc-type;
+    import acc-sdh {
+        prefix acc-sdh;
     }
 
     import acc-otn-types {
         prefix acc-otn-types;
-    }
-
-    import acc-protection-group {
-        prefix acc-pg;
     }
 	
 	 revision 2020-06-11 {
         description "Add Pdh pac for ptp.";
     }
 	
-	identity PDH {
-        base acc-type:layer-protocol-name;
-    }
 	
 	/*
    * common types
@@ -46,8 +33,8 @@ module acc-pdh {
 				value 2;
 				description "Units: Ω 欧姆. ";
 			}
-		description "E1 interface type.";
 		}
+        description "E1 interface type.";
 	}
    
    typedef e1-opcode {
@@ -60,8 +47,8 @@ module acc-pdh {
                 value 2;
                 description "AMI";
             }
-        description "Encoding format of PDH ptp port. ";
 		}
+        description "Encoding format of PDH ptp port. ";
 	}
 	
 	typedef e1-frame-type {
@@ -90,22 +77,22 @@ module acc-pdh {
         description "E1 frame type. ";
     }
 
-    augment "/acc-devm:ptps/acc-devm:ptp" {
-        when "acc-devm:layer-protocol-name = acc-type:PDH";
+    augment "/acc-devm:ptps/acc-devm:ptp/acc-sdh:sdh-ptp-pac" {
+        when "current-sdh-signal-type = 'acc-otn-types:E1'";
         container pdh-ptp-pac {
-        leaf e1-phy-type { 
-			config false;
-            type e1-phy-type;
-			description "optional";
-        }
-        leaf e1-opcode {
-            type e1-opcode;
-			description "optional";
-        }
-        leaf e1-frame-type {
-            type e1-frame-type;
-            description "optional";
-        }        
-	}
-}
+            leaf e1-phy-type { 
+			    config false;
+                type e1-phy-type;
+			    description "optional";
+            }
+            leaf e1-opcode {
+                type e1-opcode;
+			    description "optional";
+            }
+            leaf e1-frame-type {
+                type e1-frame-type;
+                description "optional";
+            }        
+	    }
+    }
 }

@@ -36,8 +36,8 @@ module acc-eos {
     }
 
     augment "/acc-devm:ftps/acc-devm:ftp/acc-eth:eth-ftp-pac" {
-        when "acc-eth:mapping-type = 'acc-eth:EoS'";
-        container vcg-pac {
+        when "acc-eth:mapping-type = 'EoS'";
+        container vcg-parameters {
             uses acc-sdh:vcg-pac;
             description "Virtual concatenation group";
         }
@@ -46,7 +46,9 @@ module acc-eos {
         input {
             uses acc-con:create-connection;
             leaf service-mapping-mode {
-                type acc-otn-types:adaptation-type;
+                type identityref{
+                    base acc-otn-types:adaptation-type;
+                }
                 description "基于SDH FTP客户信号类型，STM-1/STM-4=GMP，STM-16/STM-64=CBR_BMP";
             }
             leaf uni-protection-type {
@@ -54,8 +56,12 @@ module acc-eos {
                 description "default lag";
             }
             leaf nni-protection-type {
-                type acc-pg:protection-type;
+                type acc-pg:protection-type;				
             }
+			leaf nni-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni tcm of both work path and protection path";
+            }	
             container eth-uni {
                 leaf uni-ptp-name {
                     type string;
@@ -64,28 +70,45 @@ module acc-eos {
                     type string;
                     description "可选，用于与客户设备之间建立LAG保护（非负载均衡，单端保护）";
                 }
-                container client-vlan-spec {
-                  when "../../service-type = 'EVPL'";
-                    uses acc-con:vlan-spec;
-                    description "只适用于EVPL，指定C-VLAN，用于客户Vlan与运营商Vlan的匹配，无需携带accessAction。不携带该参数时表示端口匹配";
+				container client-vlan-spec {
+					when "../../service-type = 'EVPL'";
+						uses acc-con:vlan-spec;
+						description "只适用于EVPL，指定C-VLAN，用于客户Vlan与运营商Vlan的匹配，无需携带accessAction。不携带该参数时表示端口匹配";
+                }
+				container uni-vlan-spec {
+					when "../../service-type = 'EVPL'";
+						uses acc-con:vlan-spec;
+						description "用于在客户VLAN交换的情况下，指定C-VLAN的交换值，类型为C-TAG，可选.";
                 }
             }
             container primary-nni {
                 uses acc-otn:nni;
+                container ftp-vlan-spec {
+                    uses acc-con:vlan-spec;
+                    description "EVPL必须下发，对于其他业务可选，accessAction=PUSH_POP";
+                }
                 description "primary nni,必选";
             }
             container secondary-nni {
                 uses acc-otn:nni;
+                container ftp-vlan-spec {
+                    uses acc-con:vlan-spec;
+                    description "EVPL必须下发，对于其他业务可选，accessAction=PUSH_POP";
+                }
                 description "业务带保护模式，可选";
             }
            
             container eos-pac {
                 leaf sdh-signal-type {
-                    type acc-otn-types:client-signal-type;
+                    type identityref {
+                        base acc-otn-types:client-signal-type;
+                    }
                 }
                 leaf vc-type {
                     mandatory true;
-                    type acc-otn-types:switch-type;
+                    type identityref {
+                        base acc-otn-types:switch-type;
+                    }
                 }
                 leaf-list mapping-path {
                     min-elements 1;
@@ -94,7 +117,9 @@ module acc-eos {
                     }
                 }
                 leaf sdh-signal-type-protect {
-                    type acc-otn-types:client-signal-type;
+                    type identityref {
+                        base acc-otn-types:client-signal-type;
+                    } 
                 }
                 leaf-list mapping-path-protect {
                     type string {

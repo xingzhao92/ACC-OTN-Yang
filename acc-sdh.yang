@@ -24,15 +24,23 @@ module acc-sdh {
         prefix acc-pg;
     }
 
-    identity SDH {
+    revision 2020-07-08 {
+        description
+            "Final revision";
+        reference
+            "CCSA接入型OTN接口技术要求";
+    }
+	
+	identity SDH {
         base acc-type:layer-protocol-name;
     }
     
-
     grouping vcg-pac {
         leaf vc-type {
             mandatory true;
-            type acc-otn-types:switch-type;
+            type identityref {
+                base acc-otn-types:switch-type;
+            }
         }
         leaf lcas {
             type boolean;
@@ -75,11 +83,15 @@ module acc-sdh {
     grouping sdh-ftp {
         leaf sdh-type {
             mandatory true;
-            type acc-otn-types:client-signal-type;
+            type identityref {
+                base acc-otn-types:client-signal-type;
+            }
         }
         leaf vc-type {
             mandatory true;
-            type acc-otn-types:switch-type;
+            type identityref {
+                base acc-otn-types:switch-type;
+            }
         }
         leaf mapping-path {
             mandatory true;
@@ -93,28 +105,38 @@ module acc-sdh {
     augment "/acc-devm:ptps/acc-devm:ptp" {
         container sdh-mapping-pac {
             leaf-list supported-sdh-signal-types {
-                type acc-otn-types:client-signal-type;
+                type identityref {
+                    base acc-otn-types:client-signal-type;
+                }
             }
             leaf-list switch-capability {
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
             }
         }
     }
     
     augment "/acc-devm:ptps/acc-devm:ptp" {
-        when "acc-devm:layer-protocol-name = acc-type:SDH";
+        when "acc-devm:layer-protocol-name = 'acc-sdh:SDH'";
         container sdh-ptp-pac {
             leaf current-sdh-signal-type {
                 mandatory true;
-                type acc-otn-types:client-signal-type;
+                type identityref {
+                    base acc-otn-types:client-signal-type;
+                }
             }
             leaf-list supported-sdh-signal-types {
-                type acc-otn-types:client-signal-type;
+                type identityref {
+                    base acc-otn-types:client-signal-type;
+                }
                 config false;
             }
             leaf-list switch-capability {
                 min-elements 1;
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
                 config false;
             }
             leaf j0-actual-tx {
@@ -139,19 +161,25 @@ module acc-sdh {
     }
 
     augment "/acc-devm:ftps/acc-devm:ftp" {
-        when "acc-devm:layer-protocol-name = acc-type:SDH";
+        when "acc-devm:layer-protocol-name = 'acc-sdh:SDH'";
         container sdh-ftp-pac {
             leaf sdh-signal-type {
                 mandatory true;
-                type acc-otn-types:client-signal-type;
+                type identityref {
+                    base acc-otn-types:client-signal-type;
+                }
             }
             leaf-list switch-capability {
                 min-elements 1;
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
                 config false;
             }
             leaf service-mapping-mode {
-                type acc-otn-types:adaptation-type;
+                type identityref {
+                    base acc-otn-types:adaptation-type;
+                }
             }
             leaf j0-actual-tx {
                 type string {
@@ -173,11 +201,13 @@ module acc-sdh {
     }
 
     augment "/acc-devm:ctps/acc-devm:ctp" {
-        when "acc-devm:layer-protocol-name = acc-type:SDH";
+        when "acc-devm:layer-protocol-name = 'acc-sdh:SDH'";
         container vc-ctp-pac {
             leaf vc-type {
                 mandatory true;
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
             }
             leaf mapping-path {
                 mandatory true;
@@ -212,7 +242,9 @@ module acc-sdh {
         input {
             uses acc-con:create-connection;           
 	    leaf service-mapping-mode {
-                type acc-otn-types:adaptation-type;
+                type identityref {
+                    base acc-otn-types:adaptation-type;
+                }
             }
             leaf uni-protection-type {
                 type acc-pg:protection-type;
@@ -221,9 +253,17 @@ module acc-sdh {
             leaf nni-protection-type {
                 type acc-pg:protection-type;
             }
+			leaf nni-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni tcm of both work path and protection path";
+            }	
             leaf nni2-protection-type {
                 type acc-pg:protection-type;
             }
+			leaf nni2-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni2 tcm of both work path and protection path";
+            }	
             container sdh-uni {
                 leaf uni-ptp-name {
                     type string {
@@ -231,7 +271,9 @@ module acc-sdh {
                     }
                 }
                 leaf vc-type {
-                    type acc-otn-types:switch-type;
+                    type identityref {
+                        base acc-otn-types:switch-type;
+                    }
                 }
                 leaf mapping-path {
                     type string {
@@ -247,7 +289,9 @@ module acc-sdh {
                     }
                 }
                 leaf vc-type {
-                    type acc-otn-types:switch-type;
+                    type identityref {
+                        base acc-otn-types:switch-type;
+                    }
                 }
                 leaf mapping-path {
                     type string {

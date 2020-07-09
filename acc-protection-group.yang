@@ -3,34 +3,43 @@ module acc-protection-group {
     namespace "urn:ccsa:yang:acc-protection-group";
     prefix acc-pg;
 
-    
+    revision 2020-07-08 {
+        description
+            "Final revision";
+        reference
+            "CCSA接入型OTN接口技术要求";
+    }
+	
     /*
     * common types
     */
     typedef protection-type {
         type enumeration {
             enum odu-sncp-i { 
-		value 0;
+                value 0;
 			}
             enum odu-sncp-s { 
                 value 1;
             }
-	    enum vc-sncp { 
-		value 2;
-	    }
-	    enum och-1-plus-1 { 
-		value 3;
-		description "OTU port 1+1 protection"
-	    }
-	    enum msp-1-plus-1 {
-		value 4; 
-	    }
-            enum lag-1-to-1 {
+			enum odu-sncp-n { 
+                value 2;
+            }
+            enum vc-sncp { 
+                value 3;
+            }
+            enum och-1-plus-1 { 
+                value 4;
+                description "OTU port 1+1 protection";
+            }
+            enum msp-1-plus-1 {
                 value 5; 
-		description "ETH layer 1:1 manual & static LAG protection"
+            }
+            enum lag-1-to-1 {
+                value 6; 
+                description "ETH layer 1:1 manual & static LAG protection";
             }
             enum no-protection {
-                value 6; 
+                value 7; 
             }
         }
     }
@@ -117,7 +126,6 @@ module acc-protection-group {
         leaf pg-id {
             mandatory true;
             type uint16;
-	    default 1;
         }
         leaf protection-type {
             mandatory true;
@@ -126,16 +134,14 @@ module acc-protection-group {
         leaf reversion-mode {
             mandatory true;
             type reversion-mode;
-	    default revertive;
         }
         leaf tcm {
             type uint16;
-	    default 1;
+            default 1;
         }
         leaf switch-direction {
             mandatory true;
             type switch-direction;
-	    default uni-switch;
         }
         
         leaf switch-reason {
@@ -146,19 +152,18 @@ module acc-protection-group {
         leaf protection-direction {
             type protection-direction;
             config false;
-            description  "protection direction";
+            description "switch command, when the service is in primary path, report'toPrimary'.";
         }
         leaf hold-off {
             type uint32;
             units ms;
             default 0;
-            description  "hold off time";
+            description "hold off time";
         }
         leaf wait-to-restore-time {
             mandatory true;
             type uint64;
             units seconds;
-	    default 300;
             description "wait to restore time";
         }
         leaf sd-trigger {

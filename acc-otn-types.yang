@@ -1,7 +1,7 @@
 module acc-otn-types {
   yang-version 1.1;
   namespace "urn:ccsa:yang:acc-otn-types";
-  prefix "acc-types";
+  prefix "acc-otn-types";
 
   organization
     "China Communications Standards Association
@@ -134,7 +134,7 @@ module acc-otn-types {
     base client-signal-type;
     description
       "Client signal type of 10GE-LAN. Identity name cannot start with numbers,
-       so put "LAN" in front.";
+       so put \"LAN\" in front.";
     reference "ITU-T G.709";
      
   }
@@ -205,6 +205,13 @@ module acc-otn-types {
     base client-signal-type;
     description
       "Client signal type of OTU4. ";
+    reference "RFC7139/ITU-T G.709"; 
+  }
+
+  identity E1 {
+    base client-signal-type;
+    description
+      "Client signal type of E1. ";
     reference "RFC7139/ITU-T G.709"; 
   }
   

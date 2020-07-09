@@ -29,9 +29,6 @@ module acc-eth {
         prefix acc-pg;
     }
 
-	import acc-sdh {
-		prefix acc-sdh;
-	}
 	
     revision 2020-06-11 {
         description "add vcg-parameters in eth-ftp-pac";
@@ -135,16 +132,14 @@ module acc-eth {
         }
         leaf service-mapping-mode {
             mandatory true;
-            type acc-otn-types:adaptation-type;
+            type identityref {
+                base acc-otn-types:adaptation-type;
+            }
         }
         leaf mapping-type {
             mandatory true;
             type eth-mapping-type;
         }
-		leaf vcg-parameters {
-			type acc-sdh: vcg-pac;
-			description "VCG configuration parameters, mandatory-if-applicable. "
-		}
     }
 
     augment "/acc-devm:ptps/acc-devm:ptp" {
@@ -156,19 +151,23 @@ module acc-eth {
             }
             leaf-list supported-odu-server-switch-capability {
                 config false;
-                type acc-otn-types:switch-type;
+                type identityref{
+                    base acc-otn-types:switch-type;
+                }
                 description "ODU能力上报，支持什么就上报什么";
             }
             leaf-list supported-sdh-server-switch-capability {
                 config false;
-                type acc-otn-types:switch-type;
+                type identityref {
+                    base acc-otn-types:switch-type;
+                }
                 description "SDH能力上报，支持什么就上报什么";
             }
         }
     }
 
     augment "/acc-devm:ptps/acc-devm:ptp" {
-        when "acc-devm:layer-protocol-name = 'ETH'";
+        when "acc-devm:layer-protocol-name = 'acc-eth:ETH'";
         container eth-ptp-pac {
             leaf-list supported-working-mode {
                 type working-mode;
@@ -230,22 +229,22 @@ module acc-eth {
     }
 
     augment "/acc-devm:ftps/acc-devm:ftp" {
-        when "acc-devm:layer-protocol-name = 'ETH'";
+        when "acc-devm:layer-protocol-name = 'acc-eth:ETH'";
         container eth-ftp-pac {
             uses eth-ftp-pac;
         }
     }
 
     augment "/acc-devm:ctps/acc-devm:ctp" {
-        when "acc-devm:layer-protocol-name = 'ETH'";
+        when "acc-devm:layer-protocol-name = 'acc-eth:ETH'";
         container eth-ctp-pac {
             container vlan-spec {
                 uses acc-con:vlan-spec;
-                description "vlan spec";
+                description "vlan spec, UNI port vlan.";
             }
             container client-vlan-spec {
                 uses acc-con:vlan-spec;
-                description "client vlan spec";
+                description "client vlan spec, client service vlan.";
             }
             container performance {
                 leaf delay {
@@ -286,8 +285,7 @@ module acc-eth {
                     type boolean;
                     description "tm state";
                 }
-                leaf lm-state {
-                    mandatory true;
+                leaf lm-state {                   mandatory true;
                     type boolean;
                     description "lm state";
                 }
@@ -381,18 +379,28 @@ module acc-eth {
         input {
             uses acc-con:create-connection;
             leaf service-mapping-mode {
-                type acc-otn-types:adaptation-type;
+                type identityref {
+                    base acc-otn-types:adaptation-type;
+                }
             }
             leaf uni-protection-type {
                 type acc-pg:protection-type;
                 description "default lag";
-            }
+            }			
             leaf nni-protection-type {
                 type acc-pg:protection-type;
             }
+			leaf nni-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni tcm of both work path and protection path";
+            }				
             leaf nni2-protection-type {
                 type acc-pg:protection-type;
             }
+			leaf nni2-tcm {
+				type uint16;
+				description "when nni-protection-type = 'snc-s', needs to be issued to present the nni2 tcm of both work path and protection path";
+            }				
             container eth-uni {
                 leaf uni-ptp-name {
                     type string;
@@ -400,11 +408,17 @@ module acc-eth {
                 leaf second-uni-ptp-name {
                     type string;
                 }
-                container client-vlan-spec {
-		          when "../../service-type = 'EVPL'";
-                    uses acc-con:vlan-spec;
-                    description "只适用于EVPL，指定C-VLAN，用于客户Vlan与运营商Vlan的匹配，无需携带accessAction。不携带该参数时表示端口匹配";
+				container client-vlan-spec {
+					when "../../service-type = 'EVPL'";
+						uses acc-con:vlan-spec;
+						description "只适用于EVPL，指定C-VLAN，用于客户Vlan与运营商Vlan的匹配，无需携带accessAction。不携带该参数时表示端口匹配";
                 }
+				container uni-vlan-spec {
+					when "../../service-type = 'EVPL'";
+						uses acc-con:vlan-spec;
+						description "用于在客户VLAN交换的情况下，指定C-VLAN的交换值，类型为C-TAG，可选.";
+                }
+				
             }
 
             container primary-nni {

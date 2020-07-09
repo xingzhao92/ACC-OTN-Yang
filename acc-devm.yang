@@ -14,8 +14,9 @@ module acc-devm {
     import ietf-inet-types {
         prefix inet;
     }
-	
-    revision 2019-02-13 {
+    
+    revision 2020-07-08 {
+        description "final version";
     }
     /*
     * common types
@@ -112,23 +113,23 @@ module acc-devm {
         type enumeration {
             enum NSET {
                 value 0;
-		description "clock never set"
+                description "clock never set";
             }
             enum FSET {
                 value 1;
-		description "frequency set from file"
+                description "frequency set from file";
             }
             enum SPIK {
                 value 2;
-		description "spike detected"
+                description "spike detected";
             }
             enum FREQ {
                 value 3;
-		description "frequency mode"
+                description "frequency mode";
             }
             enum SYNC {
                 value 4;
-		description "clock synchronized"
+                description "clock synchronized";
             }
         }
         description "rfc 5905";
@@ -148,19 +149,19 @@ module acc-devm {
         type enumeration {
             enum otm-box {
                 value 0;
-	    	description "固定盒式，终端复用设备"
+                description "固定盒式，终端复用设备";
             }
             enum po-box {
                 value 1;
-		description "固定盒式，分组增强型OTN设备"
+                description "固定盒式，分组增强型OTN设备";
             }
             enum otm-pnp {
                 value 2;
-		description "插板式，终端复用设备"
+                description "插板式，终端复用设备";
             }
             enum po-pnp {
                 value 3;
-		description "插板式，分组增强型OTN设备"
+                description "插板式，分组增强型OTN设备";
             }
         }
     }
@@ -197,30 +198,40 @@ module acc-devm {
     }
 
     typedef eq-type {
-    	type enumeration {
-		enum power {
-			value 0;
-		}
-		enum fan {
-			value 1;
-		}
-		enum service {
-			value 2;
-		}
-		enum system-control {
-			value 3;
-		}
-        	enum cross-connect {
-           		value 4;
-        	}
-		enum clock {
-			value 5;
-		}
-	}
+        type enumeration {
+        enum power {
+            value 0;
+        }
+        enum fan {
+            value 1;
+        }
+        enum service {
+            value 2;
+        }
+        enum system-control {
+            value 3;
+        }
+            enum cross-connect {
+            value 4;
+            }
+        enum clock {
+            value 5;
+        }
     }
-
-    
-		
+	}
+	
+	typedef working-state {
+        type enumeration {
+        enum normal {
+            value 0;
+        }
+        enum backup {
+            value 1;
+        }    
+    }
+    }   
+	
+        
     /*
     * groupings
     */
@@ -238,7 +249,7 @@ module acc-devm {
 
     grouping ftp {
         leaf name {
-	    mandatory true;
+        mandatory true;
             type string{
             length "1..64";
             }
@@ -260,13 +271,13 @@ module acc-devm {
         leaf-list server-ctp {
             type leafref {
                 path '/acc-devm:ctps/acc-devm:ctp/acc-devm:name';
-            }	
+            }    
         }
     }
 
     grouping ctp {
         leaf name {
-	        mandatory true;
+            mandatory true;
             type string{
             length "1..64";
             }
@@ -331,14 +342,14 @@ module acc-devm {
     */
     container me {
         leaf name {
-	        mandatory true;
+            mandatory true;
             type string{
               length "1..64";
             }            
             description "for UMS, it's a label";
         }
         leaf uuid {
-	        mandatory true;
+            mandatory true;
             type string;
             config false;
             description "Universal unique identifier, MAC address is suggested. for UMS,it's real name";
@@ -438,7 +449,7 @@ module acc-devm {
                     }
                     description "Ntp version value range: 1-7, default value: V3";
                 }
-        		
+                
             }
         }
         leaf gate-way1 {
@@ -484,8 +495,8 @@ module acc-devm {
             leaf layer-protocol-name {
                 mandatory true;
                 type identityref {
-                base acc-type:layer-protocol-name;
-            }
+                    base acc-type:layer-protocol-name;
+                }
                 description "current protocol setting value";
             }
             leaf-list supported-layer-protocol-name {
@@ -517,7 +528,6 @@ module acc-devm {
                 description "Local ptp tcp-id";
             }
             leaf laser-status {
-                mandatory true;
                 type laser-status;
                 description "Laser status of ptp,default laser-on";
             }
@@ -538,11 +548,11 @@ module acc-devm {
                 description "Loop back type of ptp,default non-loopback";
             }
             leaf-list remote-ptp {
-                 type leafref {
-                    path '/acc-devm:ptps/acc-devm:ptp/acc-devm:name';
-                 } 
-                 config false;
-		 description "The namespace of remote-ptps and local ptps should be independent and without conflicts"
+                type leafref {
+					path '/acc-devm:ptps/acc-devm:ptp/acc-devm:name';
+                } 
+                config false;
+                description "The namespace of remote-ptps and local ptps should be independent and without conflicts";
             }
             container optical-power-pac {
                 leaf input-power {
@@ -606,21 +616,31 @@ module acc-devm {
                 type boolean;
                 config false;
             }
-    	    leaf-list eq-type {
-				config false;
-				type eq-type;
+            leaf-list eq-type {
+                config false;
+                type eq-type;
                 min-elements 1;
-    	    }
+            }
+			leaf xc-capability {
+                type boolean;
+                default "true";
+                config false;
+				description "Indicates whether the eq supports inter-eq cross.";
+            }
+			leaf working-state {
+                type working-state;
+				description "Indicates the eq is normal or backup.";
+            }
             leaf software-version {
                 mandatory true;
-				type string{
+                type string{
                     length "1..32";
                 }
                 config false;
             }
             leaf hardware-version {
                 mandatory true;
-				type string{
+                type string{
                     length "1..32";
                 }
                 config false;
@@ -632,10 +652,10 @@ module acc-devm {
                 }
                 config false;
             }
-	     leaf-list ftp {
+         leaf-list ftp {
                 min-elements 0;
                 type leafref {
-                    path '/acc-devm:ptps/acc-devm:ptp/acc-devm:name';
+                    path '/acc-devm:ftps/acc-devm:ftp/acc-devm:name';
                 }
                 config false;
             }
@@ -686,7 +706,7 @@ module acc-devm {
         input {
             leaf user-name {
                 type string;
-				description "可选，默认当前用户";
+                description "可选，默认当前用户";
             }
             leaf old-password {
                 mandatory true;
@@ -711,7 +731,7 @@ module acc-devm {
                 }
          }
     }
-	
+    
     rpc get-managed-element-time {
         output {
             leaf date-time {
