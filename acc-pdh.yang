@@ -18,7 +18,6 @@ module acc-pdh {
         description "Add Pdh pac for ptp.";
     }
 	
-	
 	/*
    * common types
    */
@@ -77,8 +76,7 @@ module acc-pdh {
         description "E1 frame type. ";
     }
 
-    augment "/acc-devm:ptps/acc-devm:ptp/acc-sdh:sdh-ptp-pac" {
-        when "current-sdh-signal-type = 'acc-otn-types:E1'";
+    augment "/acc-devm:ptps/acc-devm:ptp" {
         container pdh-ptp-pac {
             leaf e1-phy-type { 
 			    config false;

@@ -304,7 +304,6 @@ module acc-devm {
             config false;
         }
         leaf server-tp {
-            mandatory true;
             type string{
             length "1..64";
             }
